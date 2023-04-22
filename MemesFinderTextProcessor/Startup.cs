@@ -6,6 +6,7 @@ using MemesFinderTextProcessor.Interfaces.Adapters;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
 [assembly: FunctionsStartup(typeof(MemesFinderTextProcessor.Startup))]
@@ -27,7 +28,10 @@ namespace MemesFinderTextProcessor
 
             builder.Services.AddValidatorsFromAssemblyContaining<Startup>();
 
-            builder.Services.AddLogging();
+            builder.Services.AddLogging(logBuilder =>
+            {
+                logBuilder.AddConsole();
+            });
         }
     }
 }
