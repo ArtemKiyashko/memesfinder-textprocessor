@@ -15,13 +15,13 @@ namespace MemesFinderTextProcessor.Extensions
 		public static IServiceCollection AddServiceBusKeywordClient(this IServiceCollection services, IConfiguration configuration)
 		{
             services.Configure<ServiceBusOptions>(configuration.GetSection("ServiceBusOptions"));
+            var fullyQualifiedNamespace = configuration["ServiceBusOptions:FullyQualifiedNamespace"]
+                ?? throw new InvalidOperationException("ServiceBusOptions:FullyQualifiedNamespace is not configured.");
 
             services.AddAzureClients(clientBuilder =>
             {
-                var provider = services.BuildServiceProvider();
-
                 clientBuilder.UseCredential(new DefaultAzureCredential());
-                clientBuilder.AddServiceBusClientWithNamespace(provider.GetRequiredService<IOptions<ServiceBusOptions>>().Value.FullyQualifiedNamespace);
+                clientBuilder.AddServiceBusClientWithNamespace(fullyQualifiedNamespace);
             });
 
             services.AddTransient<IServiceBusClient, ServiceBusKeywordMessagesClient>();
@@ -32,15 +32,14 @@ namespace MemesFinderTextProcessor.Extensions
         public static IServiceCollection AddTextAnalyticsClient(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<TextAnalyticsOptions>(configuration.GetSection("TextAnalyticsOptions"));
+            var options = configuration.GetSection("TextAnalyticsOptions").Get<TextAnalyticsOptions>()
+                ?? throw new InvalidOperationException("TextAnalyticsOptions are not configured.");
 
             services.AddAzureClients(clientBuilder =>
             {
-                var provider = services.BuildServiceProvider();
-                var textAnalyticsOptions = provider.GetRequiredService<IOptions<TextAnalyticsOptions>>().Value;
-
                 clientBuilder
-                    .AddTextAnalyticsClient(textAnalyticsOptions.Url)
-                    .ConfigureOptions(options => options.DefaultLanguage = textAnalyticsOptions.Language);
+                    .AddTextAnalyticsClient(options.Url)
+                    .ConfigureOptions(clientOptions => clientOptions.DefaultLanguage = options.Language);
             });
 
             services.AddTransient<ITextAnalyticsClient, KeyPhraseExtractor>();
