@@ -6,7 +6,7 @@ using MemesFinderTextProcessor.Factories;
 using MemesFinderTextProcessor.Interfaces.Adapters;
 using MemesFinderTextProcessor.Interfaces.AzureClients;
 using MemesFinderTextProcessor.Models;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace MemesFinderTextProcessor
             _modelAdapter = modelAdapter;
         }
 
-        [FunctionName("MemesFinderTextProcessor")]
+        [Function("MemesFinderTextProcessor")]
         public async Task Run([ServiceBusTrigger("textmessages", "textprocessor", Connection = "ServiceBusOptions")] Update tgUpdate)
         {
             Message incomeMessage = MessageProcessFactory.GetMessageToProcess(tgUpdate);
